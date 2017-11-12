@@ -1,0 +1,126 @@
+#!/bin/bash
+
+ETCD_NODES_KEY=asterisk_nodes
+HOSTNAME=$(hostname -i)
+ETCD_HOST="etcd:2379"
+TTL=5
+SLEEP_SECONDS=2
+CURL_OPTS="-f -m2 -s"
+
+function log() {
+    # Log to stderr
+    >&2 echo -e "[$(date +'%Y-%m-%d %T')] $@"
+}
+
+function die() {
+    # Log message and exit
+    log $1
+    exit 1
+}
+
+function usage() {
+    # Display program usage
+    die "
+    Usage: \n
+    $0 add|del|ping --host etcd:2379 \n
+
+    --host \t\t Etcd host \t $ETCD_HOST \n
+    --ttl \t\t Time to expire in seconds \t $TTL \n
+    --seconds \t\t Seconds to wait before resend a ping \t $TTL \n
+    add|del|ping \t\t Add, delete or ping host on etcd"
+}
+
+function curl_add_node() {
+    # Add a new node on etcd
+    while true 
+    do
+        log "Add node $HOSTNAME"
+        curl $CURL_OPTS -XPUT -d value=$HOSTNAME -d ttl=$TTL \
+            "$ETCD_HOST/v2/keys/$ETCD_NODES_KEY/$HOSTNAME" > /dev/null
+        [ $? -eq "0" ] && break
+
+        log "Error adding node, retrying in $SLEEP_SECONDS seconds..."
+        sleep $SLEEP_SECONDS
+    done
+}
+
+function curl_del_node() {
+    # Delete a node from etcd
+    log "Delete node $HOSTNAME"
+    curl $CURL_OPTS -XDELETE \
+        "$ETCD_HOST/v2/keys/$ETCD_NODES_KEY/$HOSTNAME" > /dev/null
+}
+
+function curl_ping_node() {
+    # Add a node and start to update ttl for node
+    curl_add_node
+
+    log "Setup ping every $SLEEP_SECONDS seconds"
+    while true
+    do 
+        log "Update ttl=$TTL for node $HOSTNAME"
+        curl $CURL_OPTS -XPUT -d ttl=$TTL -d refresh=true -d prevExist=true \
+            "$ETCD_HOST/v2/keys/$ETCD_NODES_KEY/$HOSTNAME" > /dev/null
+        sleep $SLEEP_SECONDS
+    done
+}
+
+# Ensure we have the enhanced version of getopt available
+getopt -T > /dev/null
+[ $? -ne 4 ] && die 'Please install the enhanced version of getopt!'
+
+# Command line flags
+OPTIONS=h
+LONGOPTIONS=host:,ttl:,seconds:,help
+PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
+[ $? -ne 0 ] && usage
+
+# Parse args
+# Use eval with "$PARSED" to properly handle the quoting
+eval set -- "$PARSED"
+while true; do
+    case "$1" in
+        --host)
+            ETCD_HOST="$2"
+            shift 2
+            ;;
+        --ttl)
+            TTL="$2"
+            shift 2
+            ;;    
+        --seconds)
+            SLEEP_SECONDS="$2"
+            shift 2
+            ;;    
+        --)
+            shift
+            break
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+# Strip whitespaces if needed
+ETCD_HOST="${ETCD_HOST// }"
+# Add a http prefix if not present
+[ $ETCD_HOST != http* ] && ETCD_HOST="http://$ETCD_HOST"
+
+[ -z "$1" ] && usage
+COMMAND="$1"
+
+case $COMMAND in
+    "add")
+        curl_add_node
+        ;;
+    "del")
+        curl_del_node
+        ;;
+    "ping")
+        curl_ping_node
+        ;;    
+    *)
+        usage
+        ;;
+esac

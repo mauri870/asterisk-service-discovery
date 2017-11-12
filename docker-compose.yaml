@@ -1,0 +1,27 @@
+version: '2'
+services:
+  asterisk:
+    build: ./asterisk
+    depends_on:
+      - etcd
+  etcd-node:
+    image: node:latest
+    volumes:
+      - ./etcd-node:/app
+    working_dir: /app
+    environment:
+      - ETCD_ADDRESS=etcd:2379
+    depends_on:
+      - etcd
+    command: tail -f /dev/null
+  etcd:
+    image: quay.io/coreos/etcd
+    ports:
+      - 2379
+    command:
+      - etcd
+      - -listen-client-urls
+      - http://0.0.0.0:2379
+      - -advertise-client-urls
+      - http://0.0.0.0:2379
+

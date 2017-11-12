@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: node
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: node
+        tier: backend
+    spec:
+      containers:
+      - name: node
+        image: node-discovery
+        env:
+        - name: ETCD_ADDRESS
+          value: etcd:2379
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        imagePullPolicy: Never

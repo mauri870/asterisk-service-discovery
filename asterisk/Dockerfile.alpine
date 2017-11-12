@@ -1,0 +1,8 @@
+FROM andrius/alpine-asterisk:14 
+
+COPY discovery /usr/bin/discovery
+COPY entrypoint.sh /usr/bin/entrypoint
+
+RUN apk update && apk add bash curl
+
+ENTRYPOINT [ "entrypoint", "asterisk", "-vvvdddf" ]

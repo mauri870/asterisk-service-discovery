@@ -1,0 +1,11 @@
+{
+  "name": "etcd-node",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "etcdjs": "^2.4.2",
+    "nodemon": "^1.12.1",
+    "winston": "^3.0.0-rc1"
+  }
+}
