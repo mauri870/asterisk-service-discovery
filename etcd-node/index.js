@@ -1,8 +1,6 @@
 const logger = require('./logger')
 const etcd = require('./etcd')
 
-var asterisk_nodes = [];
-
 // Retrieve the asterisk servers on startup
 etcd.syncNodes()
 
