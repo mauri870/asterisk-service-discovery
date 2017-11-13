@@ -3,6 +3,7 @@
 ```bash
 asterisk - Simple asterisk images
 etcd-node - Simple node app to retrieve the nodes from etcd
+k8s - Kubernetes config files
 ```
 
 > A more concrete node example can be found [here](https://github.com/dougbtv/vnf-asterisk-controller)
@@ -21,6 +22,8 @@ docker-compose stop asterisk
 
 The kubernetes example is more interesting because we can see how the proccess of scaling and destroying pods happens and how the pods communicate with etcd.
 
+> You need to install `kubectl` and `minikube` 
+
 ```bash
 docker build -f asterisk/Dockerfile.alpine -t asterisk-discovery ./asterisk
 docker build -f etcd-node/Dockerfile -t node-discovery ./etcd-node
@@ -29,7 +32,7 @@ docker build -f etcd-node/Dockerfile -t node-discovery ./etcd-node
 Now we need to transfer our local images to the minikube VM. This can take a while.
 
 ```bash
-minikube start
+minikube start 
 for image in asterisk node
 do
     docker save $image-discovery | ssh -o UserKnownHostsFile=/dev/null \
