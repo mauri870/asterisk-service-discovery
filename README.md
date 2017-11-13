@@ -1,5 +1,12 @@
 ### Asterisk Service Discovery with Etcd
 
+```bash
+asterisk - Simple asterisk images
+etcd-node - Simple node app to retrieve the nodes from etcd
+```
+
+> A more concrete node example can be found [here](https://github.com/dougbtv/vnf-asterisk-controller)
+
 ### Docker compose
 
 ```bash
