@@ -2,11 +2,11 @@
 
 ```bash
 asterisk - Simple asterisk images
-etcd-node - Simple node app to retrieve the nodes from etcd
+etcd-node - Simple nodejs app to retrieve the available nodes from etcd
 k8s - Kubernetes config files
 ```
 
-> A more concrete node example can be found [here](https://github.com/dougbtv/vnf-asterisk-controller)
+> A more concrete nodejs example can be found [here](https://github.com/dougbtv/vnf-asterisk-controller)
 
 ### Docker compose
 
@@ -22,7 +22,7 @@ docker-compose stop asterisk
 
 The kubernetes example is more interesting because we can see how the proccess of scaling and destroying pods happens and how the pods communicate with etcd.
 
-> You need to install `kubectl` and `minikube` 
+> You need to install `kubectl` and `minikube`
 
 ```bash
 docker build -f asterisk/Dockerfile.alpine -t asterisk-discovery ./asterisk
